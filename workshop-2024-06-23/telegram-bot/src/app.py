@@ -1,8 +1,9 @@
 import base64
 import httpx
 import os
-from io import BytesIO
+import asyncio
 import logging
+from io import BytesIO
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 from openai import OpenAI
@@ -24,6 +25,12 @@ client = OpenAI(api_key=oai_key,
                              "https:": f"http://{proxy_user}:{proxy_pass}@{proxy_host}"}
                              ))
 
+async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    while True:
+        logging.info(f"{action}...")
+        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=action)
+        await asyncio.sleep(2)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Я искуственный интеллект. Задай мне вопрос.")
 
@@ -31,12 +38,22 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(update.message.text, quote=True)#, reply_to_message_id=update.message.id)
 
 async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    response = client.chat.completions.create(
-        model=oai_model,
-        messages=[
-            {"role": "user", "content": update.message.text}
-        ]
+
+    logging.info("start typing...")
+    typing_task = asyncio.create_task(send_status("typing", update, context))
+
+    response = await asyncio.get_running_loop().run_in_executor(
+        None,
+        lambda: client.chat.completions.create(
+            model=oai_model,
+            messages=[
+                {"role":"user", "content":update.message.text}
+            ]
+        )
     )
+
+    logging.info("stop typing...")
+    typing_task.cancel()
     # Access text content from "message" within the first "Choice"
     await update.message.reply_text(response.choices[0].message.content, quote=True)
 
@@ -45,13 +62,22 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Напиши описание картинки после команды /image", reply_to_message_id=update.message.message_id)
         return
         
+    logging.info("start upload photo...")
+    typing_task = asyncio.create_task(send_status("upload_photo", update, context))
+
     prompt = ' '.join(context.args)
-    response = client.images.generate(
-        model=oai_dalle_model,
-        prompt=prompt,
-        n=1,
-        size="1024x1024",
-        response_format="b64_json")
+    response = await asyncio.get_running_loop().run_in_executor(
+        None,
+        lambda: client.images.generate(
+            model=oai_dalle_model,
+            prompt=prompt,
+            n=1,
+            size="1024x1024",
+            response_format="b64_json")
+    )
+
+    logging.info("stop upload photo...")
+    typing_task.cancel()
     if hasattr(response, 'data') and len(response.data) > 0:
         await update.message.reply_photo(photo=BytesIO(base64.b64decode(response.data[0].b64_json)))
     else:
