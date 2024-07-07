@@ -1,5 +1,29 @@
+volumes:
+  bot_log_share: {}
+  loki_store_data: {}
+
 services:
   telegram-bot:
     build: ./telegram-bot
     env_file:
       - ./telegram-bot/.env
+    volumes:
+      - bot_log_share:/app/logs
+
+  loki-local:
+    image: grafana/loki:2.9.8
+    volumes:
+      - loki_store_data:/loki
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports:
+      - 3000:3000
+
+  promtail:
+    image: grafana/promtail:2.9.8
+    volumes:
+      - bot_log_share:/logs
+      - ./promtail/config.yml:/etc/promtail/config.yml
+    command:
+      - -config.file=/etc/promtail/config.yml

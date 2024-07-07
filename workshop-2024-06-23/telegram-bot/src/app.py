@@ -11,6 +11,8 @@ from openai import OpenAI
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
+logging.getLogger("http[]").setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
 
 oai_key = os.getenv("OAIKEY")
 oai_model = os.getenv("OAIMODEL")
@@ -27,7 +29,7 @@ client = OpenAI(api_key=oai_key,
 
 async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
     while True:
-        logging.info(f"{action}...")
+        logger.info(f"{action}...")
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=action)
         await asyncio.sleep(2)
 
@@ -39,7 +41,9 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    logging.info("start typing...")
+    logger.info(f"Запрос от пользователя {update.effective_chat.username}]")
+    logger.info(f"Текст запроса: {update.message.text}]")
+    logger.info("start typing...")
     typing_task = asyncio.create_task(send_status("typing", update, context))
 
     response = await asyncio.get_running_loop().run_in_executor(
@@ -52,7 +56,7 @@ async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     )
 
-    logging.info("stop typing...")
+    logger.info("stop typing...")
     typing_task.cancel()
     # Access text content from "message" within the first "Choice"
     await update.message.reply_text(response.choices[0].message.content, quote=True)
@@ -62,7 +66,7 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Напиши описание картинки после команды /image", reply_to_message_id=update.message.message_id)
         return
         
-    logging.info("start upload photo...")
+    logger.info("start upload photo...")
     typing_task = asyncio.create_task(send_status("upload_photo", update, context))
 
     prompt = ' '.join(context.args)
@@ -76,7 +80,7 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
             response_format="b64_json")
     )
 
-    logging.info("stop upload photo...")
+    logger.info("stop upload photo...")
     typing_task.cancel()
     if hasattr(response, 'data') and len(response.data) > 0:
         await update.message.reply_photo(photo=BytesIO(base64.b64decode(response.data[0].b64_json)))
@@ -87,10 +91,10 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main() -> None:
     """Запускаем бота"""
-    logging.info("Запускаю бот...")
-    logging.info(f"Модель промтов: {oai_model}")
-    logging.info(f"Модель dall-e: {oai_dalle_model}")
-    logging.info(f"proxy: {proxy_host}")
+    logger.info("Запускаю бот...")
+    logger.info(f"Модель промтов: {oai_model}")
+    logger.info(f"Модель dall-e: {oai_dalle_model}")
+    logger.info(f"proxy: {proxy_host}")
     application = ApplicationBuilder().token(bot_key).build()
 
     application.add_handler(CommandHandler('start', start))
