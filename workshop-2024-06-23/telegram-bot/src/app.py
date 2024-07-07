@@ -17,7 +17,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-logging.getLogger("http[]").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 oai_key = os.getenv("OAIKEY")
@@ -35,7 +35,7 @@ client = OpenAI(api_key=oai_key,
 
 async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
     while True:
-        logger.info(f"{action}...")
+        logger.debug(f"{action}...")
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=action)
         await asyncio.sleep(2)
 
@@ -47,9 +47,8 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    logger.info(f"Запрос от пользователя {update.effective_chat.username}]")
-    logger.info(f"Текст запроса: {update.message.text}]")
-    logger.info("start typing...")
+    logger.info(f"User {update.effective_chat.username}, prompt query {update.message.text}]")
+    logger.debug("start typing...")
     typing_task = asyncio.create_task(send_status("typing", update, context))
 
     response = await asyncio.get_running_loop().run_in_executor(
@@ -62,7 +61,7 @@ async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     )
 
-    logger.info("stop typing...")
+    logger.debug("stop typing...")
     typing_task.cancel()
     # Access text content from "message" within the first "Choice"
     await update.message.reply_text(response.choices[0].message.content, quote=True)
@@ -72,7 +71,8 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Напиши описание картинки после команды /image", reply_to_message_id=update.message.message_id)
         return
         
-    logger.info("start upload photo...")
+    logger.debug("start upload photo...")
+    logger.info(f"User {update.effective_chat.username}, dall-e query {update.message.text}]")
     typing_task = asyncio.create_task(send_status("upload_photo", update, context))
 
     prompt = ' '.join(context.args)
@@ -86,7 +86,7 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
             response_format="b64_json")
     )
 
-    logger.info("stop upload photo...")
+    logger.debug("stop upload photo...")
     typing_task.cancel()
     if hasattr(response, 'data') and len(response.data) > 0:
         await update.message.reply_photo(photo=BytesIO(base64.b64decode(response.data[0].b64_json)))
