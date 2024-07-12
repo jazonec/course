@@ -16,7 +16,7 @@ datasources:
     access: proxy
     # <string> Sets the data source's URL, including the
     # port.
-    url: http://localhost:3100
+    url: http://loki-local:3100
     # <bool> Toggles whether the data source is pre-selected
     # for new panels. You can set only one default
     # data source per organization.

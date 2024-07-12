@@ -1,22 +1,30 @@
 import base64
 import httpx
 import os
+import re
 import asyncio
 import logging
 from io import BytesIO
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 from openai import OpenAI
+from logfmter import Logfmter
+
+formatter = Logfmter(
+    keys=["at", "process", "level", "msg"],
+    mapping={"at": "asctime", "process": "processName", "level": "levelname", "msg": "message"},
+    datefmt='%H:%M:%S %d/%m/%Y'
+)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+file_handler = logging.FileHandler("./logs/bot.log")
+file_handler.setFormatter(formatter)
 
 logging.basicConfig(
-    format='timestamp=%(asctime)s logger=%(name)s level=%(levelname)s msg="%(message)s"',
-    datefmt='%Y-%m-%dT%H:%M:%S',
     level=logging.INFO,
-    handlers=[
-        logging.FileHandler("./logs/bot.log"),
-        logging.StreamHandler()
-    ]
-)
+    handlers=[stream_handler, file_handler])
+
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
@@ -39,7 +47,15 @@ async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=action)
         await asyncio.sleep(2)
 
+def escape_markdown(text: str) -> str:
+    """Helper function to escape telegram markup symbols."""
+
+    escape_chars = r"\_*[]()~>#+-=|{}.!"
+
+    return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.info(f"Приветствуем нового пользователя {update.effective_user.username}")
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Я искуственный интеллект. Задай мне вопрос.")
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -47,8 +63,8 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    logger.info(f"User {update.effective_chat.username}, prompt query {update.message.text}]")
-    logger.debug("start typing...")
+    logging.info(f"User {update.effective_chat.username}, prompt query {update.message.text}]")
+    logging.debug("start typing...")
     typing_task = asyncio.create_task(send_status("typing", update, context))
 
     response = await asyncio.get_running_loop().run_in_executor(
@@ -61,18 +77,21 @@ async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     )
 
-    logger.debug("stop typing...")
+    logging.debug("stop typing...")
     typing_task.cancel()
     # Access text content from "message" within the first "Choice"
-    await update.message.reply_text(response.choices[0].message.content, quote=True)
+    ai_response = escape_markdown(response.choices[0].message.content)
+    await update.message.reply_text(ai_response, quote=True)
 
 async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
     if not context.args:
+        logging.error(f"Пользователь {user.id} ({user.username}) не предоставил описание для генерации картинки в команде /image")
         await update.message.reply_text("Напиши описание картинки после команды /image", reply_to_message_id=update.message.message_id)
         return
         
-    logger.debug("start upload photo...")
-    logger.info(f"User {update.effective_chat.username}, dall-e query {update.message.text}]")
+    logging.debug("start upload photo...")
+    logging.info(f"User {user.username}, dall-e query {update.message.text}]")
     typing_task = asyncio.create_task(send_status("upload_photo", update, context))
 
     prompt = ' '.join(context.args)
@@ -86,21 +105,23 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
             response_format="b64_json")
     )
 
-    logger.debug("stop upload photo...")
+    logging.debug("stop upload photo...")
     typing_task.cancel()
     if hasattr(response, 'data') and len(response.data) > 0:
+        logging.error(f"Успешно сгенерирована картинка для запроса {prompt}")
         await update.message.reply_photo(photo=BytesIO(base64.b64decode(response.data[0].b64_json)))
     else:
+        logging.error(f"Ошибка генерации картинки для запроса {prompt}")
         await update.message.reply_text("Упс, что-то пошло не так.",
                                         reply_to_message_id=update.message.message_id)
     
 
 def main() -> None:
     """Запускаем бота"""
-    logger.info("Запускаю бот...")
-    logger.info(f"Модель промтов: {oai_model}")
-    logger.info(f"Модель dall-e: {oai_dalle_model}")
-    logger.info(f"proxy: {proxy_host}")
+    logging.info("Запускаю бот...")
+    logging.info(f"Модель промтов: {oai_model}")
+    logging.info(f"Модель dall-e: {oai_dalle_model}")
+    logging.info(f"proxy: {proxy_host}")
     application = ApplicationBuilder().token(bot_key).build()
 
     application.add_handler(CommandHandler('start', start))
