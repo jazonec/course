@@ -81,7 +81,7 @@ async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     typing_task.cancel()
     # Access text content from "message" within the first "Choice"
     ai_response = escape_markdown(response.choices[0].message.content)
-    await update.message.reply_text(ai_response, quote=True)
+    await update.message.reply_text(ai_response, quote=True, parse_mode="MarkdownV2")
 
 async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
