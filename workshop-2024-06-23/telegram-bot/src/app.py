@@ -9,6 +9,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 from openai import OpenAI
 from logfmter import Logfmter
+import asyncpg
 
 formatter = Logfmter(
     keys=["at", "process", "level", "msg"],
@@ -41,6 +42,23 @@ client = OpenAI(api_key=oai_key,
                              "https:": f"http://{proxy_user}:{proxy_pass}@{proxy_host}"}
                              ))
 
+async def db_connect():
+    return await asyncpg.connect(user=os.getenv("POSTGRES_USER"),
+                                 password=os.getenv("POSTGRES_PASSWORD"),
+                                 database=os.getenv("POSTGRES_DB"),
+                                 port=os.getenv("POSTGRES_PORT"),
+                                 host=os.getenv("DB_HOST"))
+
+
+async def is_user_allowed(user_id: int) -> bool:
+    conn = await db_connect()
+    try:
+        existing_user = await conn.fetchval("SELECT user_id FROM allowed_users WHERE user_id = $1",
+                                            user_id)
+        return existing_user is not None
+    finally:
+        await conn.close()
+
 async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
     while True:
         logger.debug(f"{action}...")
@@ -63,7 +81,14 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    logging.info(f"User {update.effective_chat.username}, prompt query {update.message.text}]")
+    user = update.effective_chat
+    if not await is_user_allowed(user.id):
+        logger.info("User %s (%s) tried to use GPT prompt but is not allowed.", user.id, user.username)
+        await update.message.reply_text("Sorry, you are not allowed to text with me.",
+                                        reply_to_message_id=update.message.message_id)
+        return
+
+    logging.info(f"User {user.username}, prompt query {update.message.text}]")
     logging.debug("start typing...")
     typing_task = asyncio.create_task(send_status("typing", update, context))
 
@@ -84,7 +109,14 @@ async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(ai_response, quote=True, parse_mode="MarkdownV2")
 
 async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
+
+    user = update.effective_chat
+    if not await is_user_allowed(user.id):
+        logger.info("User %s (%s) tried to use GPT prompt but is not allowed.", user.id, user.username)
+        await update.message.reply_text("Sorry, you are not allowed to text with me.",
+                                        reply_to_message_id=update.message.message_id)
+        return
+
     if not context.args:
         logging.error(f"Пользователь {user.id} ({user.username}) не предоставил описание для генерации картинки в команде /image")
         await update.message.reply_text("Напиши описание картинки после команды /image", reply_to_message_id=update.message.message_id)
@@ -128,7 +160,7 @@ def main() -> None:
     application.add_handler(CommandHandler("image", create_image))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat_prompt))
 
-    application.run_polling()
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
     main()
