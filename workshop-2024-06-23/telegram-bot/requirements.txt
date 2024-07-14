@@ -1,3 +1,4 @@
 python-telegram-bot==21.3
 openai==1.35.3
 logfmter==0.0.8
+asyncpg==0.29.0
