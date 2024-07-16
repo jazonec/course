@@ -61,7 +61,7 @@ async def is_user_allowed(user_id: int) -> bool:
 
 async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
     while True:
-        logger.debug(f"{action}...")
+        logging.debug(f"{action}...")
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=action)
         await asyncio.sleep(2)
 
@@ -83,7 +83,7 @@ async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = update.effective_chat
     if not await is_user_allowed(user.id):
-        logger.info("User %s (%s) tried to use GPT prompt but is not allowed.", user.id, user.username)
+        logging.info("User %s (%s) tried to use GPT prompt but is not allowed.", user.id, user.username)
         await update.message.reply_text("Sorry, you are not allowed to text with me.",
                                         reply_to_message_id=update.message.message_id)
         return
@@ -112,7 +112,7 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = update.effective_chat
     if not await is_user_allowed(user.id):
-        logger.info("User %s (%s) tried to use GPT prompt but is not allowed.", user.id, user.username)
+        logging.info("User %s (%s) tried to use GPT prompt but is not allowed.", user.id, user.username)
         await update.message.reply_text("Sorry, you are not allowed to text with me.",
                                         reply_to_message_id=update.message.message_id)
         return
