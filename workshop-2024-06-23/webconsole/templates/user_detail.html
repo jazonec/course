@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="card">
+    <div class="card-body">
+      <h4 class="header-title">Настройка пользователя {{user.username}}</h4>
+      <br>
+      <form method="POST">
+        <dl class="row">
+          <dt class="col-sm-7">Email:</dt>
+          <dd class="col-sm-5">{{user.email}}</dd>
+          <dt class="col-sm-7">Администратор:</dt>
+          <dd class="col-sm-5">
+            <input class="form-control" type="checkbox" id="is_admin" name="is_admin" {% if user.is_admin %} checked {%
+              endif %} data-switch="success" />
+            <label for="is_admin" data-on-label="Да" data-off-label="Нет"></label>
+          </dd>
+          <dt class="col-sm-7">Разрешены запросы:</dt>
+          <dd class="col-sm-5">
+            <input class="form-control" type="checkbox" id="allow_prompt" name="allow_prompt" {% if user.allow_prompt %}
+              checked {% endif %} data-switch="success" />
+            <label for="allow_prompt" data-on-label="Да" data-off-label="Нет"></label>
+          </dd>
+          <dt class="col-sm-7">Разрешена генерация картинок:</dt>
+          <dd class="col-sm-5">
+            <input class="form-control" type="checkbox" id="allow_dalle" name="allow_dalle" {% if user.allow_dalle %}
+              checked {% endif %} data-switch="success" />
+            <label for="allow_dalle" data-on-label="Да" data-off-label="Нет"></label>
+          </dd>
+          <dt class="col-sm-7">Баланс:</dt>
+          <dd class="col-sm-5">
+            <input class="form-control" type="number" id="balance" name="balance"/>
+          </dd>
+        </dl>
+        <br>
+        <button type="submit" class="btn btn-primary rounded-pill">Сохранить</button>
+        <a class="btn btn-secondary rounded-pill" href="/users">Закрыть</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

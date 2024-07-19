@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="card">
+    <div class="card-body">
+      <h4 class="header-title">Пользователи</h4>
+      <div class="table-responsive-sm">
+        <table class="table table-striped table-centered mb-0">
+          <thead>
+            <tr>
+              <th colspan="2">Пользователь</th>
+              <th colspan="2">Дата регистрации</th>
+              <th>Админ</th>
+              <th>Чат</th>
+              <th>Картинки</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td colspan="2">{{ user.username }}</td>
+              <td colspan="2">{{ user.created }}</td>
+              <td>{{ user.is_admin }}</td>
+              <td>{{ user.allow_prompt }}</td>
+              <td>{{ user.allow_dalle }}</td>
+              <td class="table-action">
+                <a href="user/{{ user.id }}" class="action-icon"> <i class="mdi mdi-pencil"></i></a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

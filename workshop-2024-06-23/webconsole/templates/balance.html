@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 {% block title %}Главная{% endblock %}
 {% block content %}
-  <h2>Привет, мир, тут будут функции управления балансом</h2>
+  <h2>Данные о балансе</h2>
+  <p>
+  <div>
+    {{session['username']}}, Ваш баланс составляет {{userbalance}}
+  </div>
 {% endblock %}
