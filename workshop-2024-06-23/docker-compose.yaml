@@ -22,7 +22,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - 5000:5000
+      - 8080:8080
 
   loki-local:
     image: grafana/loki:2.9.8
