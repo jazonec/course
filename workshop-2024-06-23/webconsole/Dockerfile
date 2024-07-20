@@ -11,4 +11,4 @@ COPY ./routes.py /app/webconsole/routes.py
 COPY ./static /app/webconsole/static
 COPY ./templates /app/webconsole/templates
 
-CMD ["waitress-serve", "webconsole:create_app"]
+CMD ["waitress-serve", "--call webconsole:create_app"]
