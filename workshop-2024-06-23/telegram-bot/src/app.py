@@ -37,6 +37,7 @@ proxy_host = os.getenv("PROXYHOST")
 proxy_user = os.getenv("PROXYLOGIN")
 proxy_pass = os.getenv("PROXYPASS")
 pg_host = os.getenv("DB_HOST")
+pg_port = os.getenv("DB_PORT")
 pg_user = os.getenv("POSTGRES_USER")
 pg_pass = os.getenv("POSTGRES_PASSWORD")
 pg_base = os.getenv("POSTGRES_DB")
@@ -47,11 +48,11 @@ client = OpenAI(api_key=oai_key,
                              ))
 
 async def db_connect():
-    return await asyncpg.connect(user=os.getenv("POSTGRES_USER"),
-                                 password=os.getenv("POSTGRES_PASSWORD"),
-                                 database=os.getenv("POSTGRES_DB"),
-                                 port=os.getenv("POSTGRES_PORT"),
-                                 host=os.getenv("DB_HOST"))
+    return await asyncpg.connect(user=pg_user,
+                                 password=pg_pass,
+                                 database=pg_base,
+                                 port=pg_port,
+                                 host=pg_host)
 
 
 async def is_user_allowed(user_id: int, username: str, claim: str) -> bool:
@@ -71,7 +72,8 @@ async def create_user(user_id: int, username: str):
         existing_user = await conn.fetchval("SELECT user_id FROM users WHERE user_id = $1", user_id)
         if existing_user is None:
             logging.info(f"Создаем нового пользователя, id={user_id}; name={username}")
-            conn.execute("INSERT into users(user_id, username) VALUES($1, $2)", user_id, username)
+            result = await conn.execute("INSERT into users(user_id, username) VALUES($1, $2)", user_id, username)
+            logging.info(f"Результат создания {result}, id={user_id}; name={username}")
     except Exception as e:
         logging.error(f"Ошибка создания нового пользователя, id={user_id}; name={username}. {e}")
     finally:

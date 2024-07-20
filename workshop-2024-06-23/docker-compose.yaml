@@ -5,11 +5,22 @@ volumes:
 
 services:
   telegram-bot:
+    depends_on:
+      postgres:
+        condition: service_healthy
     build: ./telegram-bot
     env_file:
       - ./.env
     volumes:
       - bot_log_share:/app/logs
+
+  webconsole:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build: ./webconsole
+    env_file:
+      - ./.env
 
   loki-local:
     image: grafana/loki:2.9.8
@@ -52,7 +63,7 @@ services:
       test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s
       retries: 5
-      start_period: 30s
+      start_period: 10s
       timeout: 10s
     ports:
       - "${DB_EXTERNAL_PORT}:${DB_INTERNAL_PORT}"
