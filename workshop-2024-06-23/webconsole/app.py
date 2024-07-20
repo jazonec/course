@@ -8,7 +8,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 import logging
 
-pg_host = os.getenv("DB_HOST") + ':5532'
+pg_host = os.getenv("DB_HOST")
+pg_port = os.getenv("DB_PORT")
 pg_user = os.getenv("POSTGRES_USER")
 pg_pass = os.getenv("POSTGRES_PASSWORD")
 pg_base = os.getenv("POSTGRES_DB")
@@ -19,7 +20,7 @@ class Base(DeclarativeBase):
 app = Flask(__name__)
 app.secret_key = 'some_strong_secret_key'
 
-connection_string = f"postgresql://{pg_user}:{pg_pass}@{pg_host}/{pg_base}"
+connection_string = f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_base}"
 print(connection_string)
 engine = create_engine(connection_string, echo=True)
 
