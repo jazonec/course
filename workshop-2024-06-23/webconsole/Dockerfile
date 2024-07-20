@@ -5,8 +5,10 @@ WORKDIR /app
 COPY ./requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./app.py /app
-COPY ./static /app/static
-COPY ./templates /app/templates
+COPY ./__init__.py /app/webconsole
+COPY ./database.py /app/webconsole
+COPY ./routes.py /app/webconsole
+COPY ./static /app/webconsole/static
+COPY ./templates /app/webconsole/templates
 
-CMD ["python", "app.py"]
+CMD ["waitress-serve", "webconsole:create_app"]
