@@ -54,14 +54,29 @@ async def db_connect():
                                  host=os.getenv("DB_HOST"))
 
 
-async def is_user_allowed(user_id: int) -> bool:
+async def is_user_allowed(user_id: int, username: str, claim: str) -> bool:
     conn = await db_connect()
     try:
-        existing_user = await conn.fetchval("SELECT user_id FROM allowed_users WHERE user_id = $1",
-                                            user_id)
-        return existing_user is not None
+        logging.info(f"Проверяем право {claim} пользователя, id={user_id}; name={username}")
+        claim_granted = await conn.fetchval(f"SELECT {claim} FROM users WHERE user_id = $1", user_id)
+        return False if claim_granted is None else bool(claim_granted)
+    except Exception as e:
+        logging.error(f"Ошибка проверки права {claim} пользователя id={user_id}; name={username}. {e}")
     finally:
         await conn.close()
+
+async def create_user(user_id: int, username: str):
+    conn = await db_connect()
+    try:
+        existing_user = await conn.fetchval("SELECT user_id FROM users WHERE user_id = $1", user_id)
+        if existing_user is None:
+            logging.info(f"Создаем нового пользователя, id={user_id}; name={username}")
+            conn.execute("INSERT into users(user_id, username) VALUES($1, $2)", user_id, username)
+    except Exception as e:
+        logging.error(f"Ошибка создания нового пользователя, id={user_id}; name={username}. {e}")
+    finally:
+        await conn.close()
+
 
 async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
     while True:
@@ -78,6 +93,7 @@ def escape_markdown(text: str) -> str:
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"Приветствуем нового пользователя {update.effective_user.username}")
+    await create_user(update.effective_chat.id, update.effective_user.username)
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Я искуственный интеллект. Задай мне вопрос.")
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -86,7 +102,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = update.effective_chat
-    if not await is_user_allowed(user.id):
+    if not await is_user_allowed(user.id, user.username, "allow_prompt"):
         logging.info("User %s (%s) tried to use GPT prompt but is not allowed.", user.id, user.username)
         await update.message.reply_text("Sorry, you are not allowed to text with me.",
                                         reply_to_message_id=update.message.message_id)
@@ -115,7 +131,7 @@ async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = update.effective_chat
-    if not await is_user_allowed(user.id):
+    if not await is_user_allowed(user.id, user.username, "allow_dalle"):
         logging.info("User %s (%s) tried to use GPT prompt but is not allowed.", user.id, user.username)
         await update.message.reply_text("Sorry, you are not allowed to text with me.",
                                         reply_to_message_id=update.message.message_id)

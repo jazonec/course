@@ -41,7 +41,7 @@ databaseChangeLog:
                   type: BOOLEAN
                   defaultValue: false
               - column:
-                  name: allow_update
+                  name: allow_dalle
                   type: BOOLEAN
                   defaultValue: false
               - column:

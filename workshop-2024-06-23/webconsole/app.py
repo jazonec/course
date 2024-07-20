@@ -72,6 +72,7 @@ def login():
         session['allow_prompt'] = False
         session['allow_dalle'] = False
         userdata = session_engine.scalars(select(User).where(User.username == session['username'])).first()
+        print(userdata)
         if userdata != None:
             session['user_id'] = userdata.user_id
             session['created'] = userdata.created
