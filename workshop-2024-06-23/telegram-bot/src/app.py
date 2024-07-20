@@ -36,6 +36,10 @@ bot_key = os.getenv("BOTKEY")
 proxy_host = os.getenv("PROXYHOST")
 proxy_user = os.getenv("PROXYLOGIN")
 proxy_pass = os.getenv("PROXYPASS")
+pg_host = os.getenv("DB_HOST")
+pg_user = os.getenv("POSTGRES_USER")
+pg_pass = os.getenv("POSTGRES_PASSWORD")
+pg_base = os.getenv("POSTGRES_DB")
 client = OpenAI(api_key=oai_key,
                 http_client=httpx.Client(
                     proxies={"http:": f"http://{proxy_user}:{proxy_pass}@{proxy_host}",

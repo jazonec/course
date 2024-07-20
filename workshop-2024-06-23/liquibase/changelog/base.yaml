@@ -12,3 +12,57 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
+  - changeSet:
+      id: 2
+      author: sldubinsky
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: username
+                  type: VARCHAR(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(120)
+              - column:
+                  name: is_admin
+                  type: BOOLEAN
+                  defaultValue: false
+              - column:
+                  name: allow_prompt
+                  type: BOOLEAN
+                  defaultValue: false
+              - column:
+                  name: allow_update
+                  type: BOOLEAN
+                  defaultValue: false
+              - column:
+                  name: created
+                  type: DATETIME
+                  defaultValue: 'now()'
+        - createTable:
+            tableName: user_balance
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: balance
+                  type: NUMERIC(15,2)
+        - addForeignKeyConstraint:
+            baseTableName: user_balance
+            baseColumnNames: user_id
+            constraintName: fk_user_balance_user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            onDelete: CASCADE
