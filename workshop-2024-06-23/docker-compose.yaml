@@ -7,7 +7,7 @@ services:
   telegram-bot:
     build: ./telegram-bot
     env_file:
-      - ./telegram-bot/.env
+      - ./.env
     volumes:
       - bot_log_share:/app/logs
 
