@@ -1,7 +1,6 @@
-from flask import Blueprint, render_template, session, redirect, url_for, request, g
+from flask import Blueprint, render_template, session, redirect, url_for, request
 from webconsole.database import get_engine, User, UserBalance
 from sqlalchemy import select, update
-from flask import current_app, g
 
 bp = Blueprint('main', __name__)
 
