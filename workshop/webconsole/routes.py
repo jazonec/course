@@ -72,7 +72,8 @@ def user_detail(user_id):
     if ('username' in session and session['is_admin'] == True):
         if request.method == 'GET':
             _user = session_engine.scalars(select(User).where(User.user_id==user_id)).first()
-            return render_template('user_detail.html', user=_user)
+            _user_balance = session_engine.scalars(select(UserBalance).where(UserBalance.user_id==user_id)).first()
+            return render_template('user_detail.html', user=_user, user_balance=_user_balance)
         elif request.method == 'POST':
             is_admin = ('is_admin' in request.form)
             allow_prompt = ('allow_prompt' in request.form)
