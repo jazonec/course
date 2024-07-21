@@ -1,0 +1,2 @@
+class OAICreateImageException(Exception):
+    pass
