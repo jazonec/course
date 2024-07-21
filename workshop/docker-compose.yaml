@@ -12,7 +12,7 @@ services:
     env_file:
       - ./.env
     volumes:
-      - bot_log_share:/app/logs
+      - bot_log_share:/tgbot/logs
 
   webconsole:
     depends_on:

@@ -1,10 +1,10 @@
 FROM python:3.9-slim
 
-WORKDIR /app
+WORKDIR /tgbot
 
-COPY ./requirements.txt /app
+COPY ./requirements.txt /tgbot
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./src/app.py /app
+COPY ./app /tgbot/app
 
-CMD ["python", "app.py"]
+CMD ["python", "app/main.py"]

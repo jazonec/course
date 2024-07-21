@@ -9,6 +9,7 @@ def init_logger():
         datefmt='%H:%M:%S %d/%m/%Y'
     )
 
+    print("checkpoint 1")
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)
     file_handler = logging.FileHandler("./logs/bot.log")
