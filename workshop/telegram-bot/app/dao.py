@@ -33,10 +33,10 @@ async def is_user_allowed(user_id: int, username: str, claim: str) -> tuple[bool
     conn = await db_connect()
     try:
         logger.info(f"Проверяем право {claim} пользователя, id={user_id}; name={username}")
-        user_data = await conn.fetchrow(f"SELECT COALESCE(balance, 0) as balance, {claim} 
+        user_data = await conn.fetchrow(f'''SELECT COALESCE(balance, 0) as balance, {claim} 
                                         FROM users LEFT JOIN user_balance 
                                         ON users.user_id = user_balance.user_id 
-                                        WHERE users.user_id = $1", user_id)
+                                        WHERE users.user_id = {user_id}''')
         logger.debug(f"user_data = {user_data}")
         if user_data is None:
             return False, "не зарегистрирован"

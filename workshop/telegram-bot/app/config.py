@@ -1,6 +1,8 @@
+''' Модуль обеспечивает настройки для остальных модулей'''
 import os
 
 class Settings():
+    ''' Класс хранит настройки приложения '''
     oai_key = os.getenv("OAIKEY")
     oai_model = os.getenv("OAIMODEL")
     oai_dalle_model = os.getenv("OAIDALLEMODEL")
@@ -16,10 +18,9 @@ class Settings():
 
 settings = Settings()
 
-
 def get_db_url():
-    return (f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@"
-            f"{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
+    return f'''postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@
+        {settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}'''
 
 def get_oaiproxy_url():
-    return(f"http://{settings.proxy_user}:{settings.proxy_pass}@{settings.proxy_host}")
+    return f"http://{settings.proxy_user}:{settings.proxy_pass}@{settings.proxy_host}"
