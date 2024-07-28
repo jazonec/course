@@ -1,0 +1,40 @@
+name: Telegram Bot CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    paths:
+      - 'workshop/telegram-bot/**'
+
+env:
+  PROJECT_NAME: tg-bot_gpt
+
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pylint
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+        working-directory: ./workshop/telegram-bot
+
+      - name: Analysing the code with pylint
+        run: |
+          pylint *.py
+        working-directory: ./workshop/telegram_bot/app
