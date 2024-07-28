@@ -1,8 +1,8 @@
+from io import BytesIO
+import re, httpx, logging, asyncio, base64
 from openai import OpenAI
 from config import settings, get_oaiproxy_url
 from exceptions import OAICreateImageException
-from io import BytesIO
-import re, httpx, logging, asyncio, base64
 
 logging.info(f"proxy: {settings.proxy_host}")
 client = OpenAI(api_key=settings.oai_key,
