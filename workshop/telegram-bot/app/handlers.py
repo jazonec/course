@@ -19,19 +19,25 @@ async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"Приветствуем нового пользователя {update.effective_user.username}")
     await dao.create_user(update.effective_chat.id, update.effective_user.username)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Я искуственный интеллект. Задай мне вопрос.")
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id, text="Я искуственный интеллект. Задай мне вопрос.")
 
 async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = update.effective_chat
     allow, why = await dao.is_user_allowed(user.id, user.username, "allow_prompt")
     if not allow:
-        logging.info("User %s (%s) tried to use GPT prompt but is not allowed. Cause is %s", user.id, user.username, why)
-        await update.message.reply_text(f"Sorry, you are not allowed to text with me because of '{why}'.",
-                                        reply_to_message_id=update.message.message_id)
+        logging.info(
+            "User %s (%s) tried to use GPT prompt but is not allowed. Cause is %s",
+            user.id,
+            user.username,
+            why)
+        await update.message.reply_text(
+            f"Sorry, you are not allowed to text with me because of '{why}'.",
+            reply_to_message_id=update.message.message_id)
         return
 
-    logging.info(f"User {user.username}, prompt query {update.message.text}]")
+    logging.info("User $1, prompt query $2", user.username, update.message.text)
     logging.debug("start typing...")
     typing_task = asyncio.create_task(send_status("typing", update, context))
     ai_response = await oai.get_prompt(update.message.text)
@@ -44,16 +50,22 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_chat
     allow, why = await dao.is_user_allowed(user.id, user.username, "allow_dalle")
     if not allow:
-        logging.info("User %s (%s) tried to use GPT prompt but is not allowed.", user.id, user.username)
-        await update.message.reply_text(f"Sorry, you are not allowed to text with me because of '{why}'.",
-                                        reply_to_message_id=update.message.message_id)
+        logging.info("User %s (%s) tried to use GPT prompt but is not allowed.",
+                     user.id, user.username)
+        await update.message.reply_text(
+            f"Sorry, you are not allowed to text with me because of '{why}'.",
+            reply_to_message_id=update.message.message_id)
         return
 
     if not context.args:
-        logging.error(f"Пользователь {user.id} ({user.username}) не предоставил описание для генерации картинки в команде /image")
-        await update.message.reply_text("Напиши описание картинки после команды /image", reply_to_message_id=update.message.message_id)
+        logging.error(
+            "Пользователь %s (%s) не предоставил описание для генерации картинки в команде /image",
+            user.id,user.username)
+        await update.message.reply_text(
+            "Напиши описание картинки после команды /image",
+            reply_to_message_id=update.message.message_id)
         return
-        
+
     logging.debug("start upload photo...")
     logging.info(f"User {user.username}, dall-e query {update.message.text}]")
     typing_task = asyncio.create_task(send_status("upload_photo", update, context))
@@ -61,7 +73,7 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         photo = await oai.get_image(' '.join(context.args))
         await update.message.reply_photo(photo=photo)
-    except OAICreateImageException as e:
+    except OAICreateImageException:
         await update.message.reply_text("Упс, что-то пошло не так.",
                                         reply_to_message_id=update.message.message_id)
     finally:
