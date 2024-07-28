@@ -37,4 +37,4 @@ jobs:
       - name: Analysing the code with pylint
         run: |
           pylint *.py
-        working-directory: ./workshop/telegram_bot/app
+        working-directory: ./workshop/telegram-bot/app
