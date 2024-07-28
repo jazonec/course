@@ -15,7 +15,7 @@ def init_handlers(application: ApplicationBuilder):
 async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''Асинхронная отправка статусов в чат'''
     while True:
-        logging.debug(f"{action}...")
+        logging.debug("Sending status %s...", action)
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action=action)
         await asyncio.sleep(2)
 
@@ -33,15 +33,13 @@ async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not allow:
         logging.info(
             "User %s (%s) tried to use GPT prompt but is not allowed. Cause is %s",
-            user.id,
-            user.username,
-            why)
+            user.id, user.username, why)
         await update.message.reply_text(
             f"Sorry, you are not allowed to text with me because of '{why}'.",
             reply_to_message_id=update.message.message_id)
         return
 
-    logging.info("User $1, prompt query $2", user.username, update.message.text)
+    logging.info("User %s, prompt query %s", user.username, update.message.text)
     logging.debug("start typing...")
     typing_task = asyncio.create_task(send_status("typing", update, context))
     ai_response = await oai.get_prompt(update.message.text)
@@ -71,7 +69,7 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     logging.debug("start upload photo...")
-    logging.info(f"User {user.username}, dall-e query {update.message.text}]")
+    logging.info("User %s, send dall-e query %s", user.username, update.message.text)
     typing_task = asyncio.create_task(send_status("upload_photo", update, context))
 
     try:
