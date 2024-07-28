@@ -1,7 +1,6 @@
-from flask import Blueprint, render_template, session, redirect, url_for, request, g
+from flask import Blueprint, render_template, session, redirect, url_for, request
 from webconsole.database import get_engine, User, UserBalance
 from sqlalchemy import select, update
-from flask import current_app, g
 
 bp = Blueprint('main', __name__)
 
@@ -73,12 +72,13 @@ def user_detail(user_id):
     if ('username' in session and session['is_admin'] == True):
         if request.method == 'GET':
             _user = session_engine.scalars(select(User).where(User.user_id==user_id)).first()
-            return render_template('user_detail.html', user=_user)
+            _user_balance = session_engine.scalars(select(UserBalance).where(UserBalance.user_id==user_id)).first()
+            return render_template('user_detail.html', user=_user, user_balance=_user_balance)
         elif request.method == 'POST':
             is_admin = ('is_admin' in request.form)
             allow_prompt = ('allow_prompt' in request.form)
             allow_dalle = ('allow_dalle' in request.form)
-            balance = 0 if (request.form['balance']=='') else int(request.form['balance'])
+            balance = 0 if (request.form['balance']=='') else request.form['balance']
             session_engine.execute(update(User).where(User.user_id==user_id).values(is_admin=is_admin, allow_prompt=allow_prompt, allow_dalle=allow_dalle))
             session_engine.execute(update(UserBalance).where(UserBalance.user_id==user_id).values(balance=balance))
             session_engine.commit()
