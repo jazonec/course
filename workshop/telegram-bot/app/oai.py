@@ -44,7 +44,7 @@ async def get_image(message_text: str):
             response_format="b64_json")
     )
     if hasattr(response, 'data') and len(response.data) > 0:
-        logging.debug(f"Успешно сгенерирована картинка для запроса {message_text}")
+        logging.debug("Успешно сгенерирована картинка для запроса %s", message_text)
         return BytesIO(base64.b64decode(response.data[0].b64_json))
     logging.error("Ошибка генерации картинки для запроса %s", message_text)
     raise OAICreateImageException("OAI: Ошибка генерации картинки")

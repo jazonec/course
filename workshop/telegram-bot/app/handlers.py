@@ -3,7 +3,8 @@ import logging
 import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
-import dao, oai
+import dao
+import oai
 from exceptions import OAICreateImageException
 
 def init_handlers(application: ApplicationBuilder):
