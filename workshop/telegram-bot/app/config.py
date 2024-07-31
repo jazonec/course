@@ -22,8 +22,9 @@ settings = Settings()
 
 def get_db_url():
     '''Возвращает строку подключения к базе данных'''
-    return f'''postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@
-        {settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}'''
+    _url = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@"
+    _url = _url + f"{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+    return _url
 
 def get_oaiproxy_url():
     '''Возвращает строку подключения к прокси (для OpenAI)'''

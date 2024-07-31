@@ -1,10 +1,6 @@
 '''Основной модуль'''
 import logging
 from logfmter import Logfmter
-from telegram import Update
-from telegram.ext import ApplicationBuilder
-from config import settings
-import handlers
 
 formatter = Logfmter(
     keys=["at", "process", "level", "msg"],
@@ -20,6 +16,11 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.basicConfig(
     level=logging.INFO
     ,handlers=[stream_handler, file_handler])
+
+from telegram import Update
+from telegram.ext import ApplicationBuilder
+from config import settings
+import handlers
 
 application = ApplicationBuilder().token(settings.bot_key).build()
 logging.info("Инициализирую хэндлеры...")
