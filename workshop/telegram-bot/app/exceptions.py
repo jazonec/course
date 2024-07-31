@@ -1,2 +1,3 @@
+''' Описание классов-ошибок'''
 class OAICreateImageException(Exception):
-    pass
+    ''' Ошибка генерации картинки '''

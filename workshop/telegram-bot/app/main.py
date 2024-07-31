@@ -1,5 +1,10 @@
+'''Основной модуль'''
 import logging
 from logfmter import Logfmter
+from telegram import Update
+from telegram.ext import ApplicationBuilder
+from config import settings
+import handlers
 
 formatter = Logfmter(
     keys=["at", "process", "level", "msg"],
@@ -16,15 +21,10 @@ logging.basicConfig(
     level=logging.INFO
     ,handlers=[stream_handler, file_handler])
 
-from config import settings
-import handlers
-from telegram import Update
-from telegram.ext import ApplicationBuilder
-
 application = ApplicationBuilder().token(settings.bot_key).build()
 logging.info("Инициализирую хэндлеры...")
 handlers.init_handlers(application)
 logging.info("Запускаю бот...")
-logging.info(f"Модель промтов: {settings.oai_model}")
-logging.info(f"Модель dall-e: {settings.oai_dalle_model}")
+logging.info("Модель промтов: %s", settings.oai_model)
+logging.info("Модель dall-e: %s", settings.oai_dalle_model)
 application.run_polling(allowed_updates=Update.ALL_TYPES)
