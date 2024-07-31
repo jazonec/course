@@ -47,6 +47,7 @@ async def chat_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.debug("stop typing...")
     typing_task.cancel()
     await update.message.reply_text(ai_response, quote=True, parse_mode="MarkdownV2")
+    await dao.decrease_balance(user.id, user.username, "allow_dalle")
 
 async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''Создание картинки по запросу от пользователя'''
@@ -82,3 +83,4 @@ async def create_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     finally:
         logging.debug("stop upload photo...")
         typing_task.cancel()
+        await dao.decrease_balance(user.id, user.username, "allow_dalle")

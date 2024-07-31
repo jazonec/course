@@ -1,6 +1,8 @@
 ''' Модуль обеспечивает настройки для остальных модулей'''
 import os
+from dataclasses import dataclass
 
+@dataclass
 class Settings():
     ''' Класс хранит настройки приложения '''
     oai_key = os.getenv("OAIKEY")
@@ -19,8 +21,10 @@ class Settings():
 settings = Settings()
 
 def get_db_url():
+    '''Возвращает строку подключения к базе данных'''
     return f'''postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@
         {settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}'''
 
 def get_oaiproxy_url():
+    '''Возвращает строку подключения к прокси (для OpenAI)'''
     return f"http://{settings.proxy_user}:{settings.proxy_pass}@{settings.proxy_host}"
