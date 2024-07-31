@@ -68,7 +68,9 @@ async def decrease_balance(user_id: int, username: str, claim: str):
     '''Списываем с баланса плату за операцию'''
     conn = await db_connect()
     try:
-        logger.info("Списываем плату за %s с баланса пользователя, id=%s; name=%s", claim, user_id, username)
+        logger.info(
+            "Списываем плату за %s с баланса пользователя, id=%s; name=%s",
+            claim, user_id, username)
         price = 0
         if claim == "allow_prompt":
             price = 1
