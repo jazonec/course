@@ -1,6 +1,9 @@
+'''Работа с базой данных'''
 import os
+from dataclasses import dataclass
 
-from sqlalchemy import DateTime, Boolean, String, Numeric, ForeignKey, select, update, create_engine, BIGINT, func, sql
+from sqlalchemy import DateTime, Boolean, String, Numeric, BIGINT
+from sqlalchemy import  ForeignKey, create_engine, func, sql
 from sqlalchemy.orm import DeclarativeBase, Session
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -10,15 +13,21 @@ pg_user = os.getenv("POSTGRES_USER")
 pg_pass = os.getenv("POSTGRES_PASSWORD")
 pg_base = os.getenv("POSTGRES_DB")
 
-engine = create_engine(f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_base}", echo=True)
+engine = create_engine(
+    f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_base}",
+    echo=True)
 
+@dataclass
 class Base(DeclarativeBase):
-  pass
+    '''Служебный класс для построения схемы'''
 
 def get_engine():
+    '''Возвращает сессию фреймворка'''
     return Session(engine)
 
+@dataclass
 class User(Base):
+    '''Пользователи бота'''
     __tablename__ = "users"
 
     user_id: Mapped[BIGINT] = mapped_column(BIGINT, primary_key=True)
@@ -31,15 +40,18 @@ class User(Base):
 
     user_balance: Mapped["UserBalance"] = relationship(back_populates="user")
 
+@dataclass
 class UserBalance(Base):
+    '''Баланс пользователей бота'''
     __tablename__ = "user_balance"
 
     user_id = mapped_column(BIGINT, ForeignKey("users.user_id"), primary_key=True)
     balance = mapped_column(Numeric(15,2))
-    
+
     user: Mapped["User"] = relationship(back_populates="user_balance")
 
 # class UserBalanceDetail(Base):
+#    '''Запросы пользователей бота'''
 #    __tablename__ = "user_balance_detail"
 #
 #    id: Mapped[int] = mapped_column(Integer, primary_key=True)

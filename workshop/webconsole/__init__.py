@@ -1,9 +1,10 @@
+'''Основной модуль'''
 import os
-
 from flask import Flask
-
+from . import routes
 
 def create_app(test_config=None):
+    '''Создаю приложение'''
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev'
@@ -20,11 +21,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
-    
-    from . import routes
     app.register_blueprint(routes.bp)
 
     return app
