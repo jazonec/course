@@ -52,14 +52,12 @@ jobs:
       - name: Analysing telegram-bot with pylint
         if: steps.filter.outputs.telegram-bot == 'true'
         run: |
-          pip install -r requirements.txt
           pylint *.py
         working-directory: ./workshop/telegram-bot/app
 
       - name: Analysing webconsole with pylint
         if: steps.filter.outputs.webconsole == 'true'
         run: |
-          pip install -r requirements.txt
           pylint *.py
         working-directory: ./workshop/webconsole
 

@@ -20,7 +20,6 @@ engine = create_engine(
 @dataclass
 class Base(DeclarativeBase):
     '''Служебный класс для построения схемы'''
-    pass
 
 def get_engine():
     '''Возвращает сессию фреймворка'''
@@ -48,7 +47,7 @@ class UserBalance(Base):
 
     user_id = mapped_column(BIGINT, ForeignKey("users.user_id"), primary_key=True)
     balance = mapped_column(Numeric(15,2))
-    
+
     user: Mapped["User"] = relationship(back_populates="user_balance")
 
 # class UserBalanceDetail(Base):

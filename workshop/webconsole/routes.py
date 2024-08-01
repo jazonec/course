@@ -85,7 +85,7 @@ def user_detail(user_id):
     '''Управление пользователем'''
     print(request.method)
     print(session)
-    if ('username' in session and session['is_admin'] == True):
+    if ('username' in session and session['is_admin'] is True):
         if request.method == 'GET':
             _user = session_engine.scalars(
                 select(User).where(User.user_id==user_id)
