@@ -37,6 +37,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint
 
+      - name: Install telegram-bot requirements
+        if: steps.filter.outputs.telegram-bot == 'true'
+        run: |
+          pip install -r requirements.txt
+        working-directory: ./workshop/telegram-bot/app
+
+      - name: Install webconsole requirements
+        if: steps.filter.outputs.webconsole == 'true'
+        run: |
+          pip install -r requirements.txt
+        working-directory: ./workshop/webconsole
+
       - name: Analysing telegram-bot with pylint
         if: steps.filter.outputs.telegram-bot == 'true'
         run: |

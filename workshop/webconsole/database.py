@@ -3,7 +3,7 @@ import os
 from dataclasses import dataclass
 
 from sqlalchemy import DateTime, Boolean, String, Numeric, BIGINT
-from sqlalchemy import  ForeignKey, select, update, create_engine, func, sql
+from sqlalchemy import  ForeignKey, create_engine, func, sql
 from sqlalchemy.orm import DeclarativeBase, Session
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -19,9 +19,11 @@ engine = create_engine(
 
 @dataclass
 class Base(DeclarativeBase):
-  pass
+    '''Служебный класс для построения схемы'''
+    pass
 
 def get_engine():
+    '''Возвращает сессию фреймворка'''
     return Session(engine)
 
 @dataclass
