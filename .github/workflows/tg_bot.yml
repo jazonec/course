@@ -18,6 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            telegram-bot:
+              - 'workshop/telegram-bot/**'
+            webconsole:
+              - 'workshop/webconsole/**'
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -32,12 +40,20 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-        working-directory: ./workshop/telegram-bot
+        working-directory: ./workshop
 
-      - name: Analysing the code with pylint
+      - name: Analysing telegram-bot with pylint
+        if: steps.filter.outputs.telegram-bot == 'true'
         run: |
           pylint *.py
         working-directory: ./workshop/telegram-bot/app
+
+      - name: Analysing webconsole with pylint
+        if: steps.filter.outputs.webconsole == 'true'
+        run: |
+          pylint *.py
+        working-directory: ./workshop/webconsole/app
+
   build_and_push:
 #    needs:
 #      - pylint
@@ -49,6 +65,7 @@ jobs:
       matrix:
         dir:
           - telegram-bot
+          - webconsole
           - liquibase
     steps:
       - uses: actions/checkout@v4
