@@ -8,7 +8,7 @@ on:
       - reopened
       - synchronize
     paths:
-      - 'workshop/telegram-bot/**'
+      - 'workshop/**'
 
 env:
   PROJECT_NAME: tg-bot_gpt
@@ -37,22 +37,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-        working-directory: ./workshop
-
       - name: Analysing telegram-bot with pylint
         if: steps.filter.outputs.telegram-bot == 'true'
         run: |
+          pip install -r requirements.txt
           pylint *.py
         working-directory: ./workshop/telegram-bot/app
 
       - name: Analysing webconsole with pylint
         if: steps.filter.outputs.webconsole == 'true'
         run: |
+          pip install -r requirements.txt
           pylint *.py
-        working-directory: ./workshop/webconsole/app
+        working-directory: ./workshop/webconsole
 
   build_and_push:
 #    needs:
