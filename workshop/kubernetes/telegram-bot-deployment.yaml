@@ -77,16 +77,16 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: DB_HOST
-            - name: OPENAI_API_KEY
+            - name: OAIKEY
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
-                  key: OPENAI_API_KEY
-            - name: TELEGRAM_BOT_TOKEN
+                  key: OAIKEY
+            - name: BOTKEY
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
-                  key: TELEGRAM_BOT_TOKEN
+                  key: BOTKEY
             - name: IMAGE_PRICE
               valueFrom:
                 secretKeyRef:

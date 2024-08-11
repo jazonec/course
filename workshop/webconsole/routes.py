@@ -76,7 +76,7 @@ def users():
     if ('username' in session and session['is_admin'] is True):
         user_list = session_engine.scalars(
             select(User, UserBalance)
-            .join_from(User, UserBalance))
+            .join_from(User, UserBalance, isouter=True))
         return render_template('users.html', users=user_list)
     return render_template('404.html')
 
