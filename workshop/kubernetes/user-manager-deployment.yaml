@@ -15,9 +15,9 @@ spec:
     spec:
       containers:
         - name: user-manager
-          image: ghcr.io/jazonec/tg-bot_gpt-webconsoler:latest
+          image: ghcr.io/jazonec/tg-bot_gpt-webconsole:latest
           ports:
-            - containerPort: 5000
+            - containerPort: 8080
           env:
             - name: FLASK_APP
               value: manager.py
