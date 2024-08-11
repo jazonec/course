@@ -1,6 +1,7 @@
 '''Основной модуль'''
 import logging
 from logfmter import Logfmter
+from config import settings
 
 formatter = Logfmter(
     keys=["at", "process", "level", "msg"],
@@ -10,16 +11,19 @@ formatter = Logfmter(
 
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
-file_handler = logging.FileHandler("./logs/bot.log")
-file_handler.setFormatter(formatter)
+enabled_handlers = [stream_handler]
+if settings.LOG_TO_FILE == "true":
+    file_handler = logging.FileHandler("./logs/bot.log")
+    file_handler.setFormatter(formatter)
+    enabled_handlers.append(file_handler)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.basicConfig(
-    level=logging.INFO
-    ,handlers=[stream_handler, file_handler])
+    level=logging.INFO,
+    handlers=enabled_handlers
+)
 
 from telegram import Update
 from telegram.ext import ApplicationBuilder
-from config import settings
 import handlers
 
 application = ApplicationBuilder().token(settings.bot_key).build()

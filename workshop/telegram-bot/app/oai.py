@@ -10,11 +10,11 @@ from config import settings, get_oaiproxy_url
 from exceptions import OAICreateImageException
 
 logging.info("proxy: %s", settings.proxy_host)
-client = OpenAI(api_key=settings.oai_key,
-                http_client=httpx.Client(
-                    proxies={"http:": get_oaiproxy_url(),
-                         "https:": get_oaiproxy_url()}
-                )
+client = OpenAI(api_key=settings.oai_key
+                #, http_client=httpx.Client(
+                #    proxies={"http:": get_oaiproxy_url(),
+                #         "https:": get_oaiproxy_url()}
+                #)
 )
 
 async def get_prompt(message_text: str):
