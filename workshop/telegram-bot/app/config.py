@@ -17,6 +17,7 @@ class Settings():
     DB_USER = os.getenv("POSTGRES_USER")
     DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
     DB_NAME = os.getenv("POSTGRES_DB")
+    LOG_TO_FILE = os.getenv("LOG_TO_FILE", "False").lower()
 
 settings = Settings()
 
