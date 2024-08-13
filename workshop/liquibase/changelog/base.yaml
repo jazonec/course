@@ -66,3 +66,26 @@ databaseChangeLog:
             referencedTableName: users
             referencedColumnNames: user_id
             onDelete: CASCADE
+  - changeset:
+      changes:
+        - insert:
+          tableName: users
+          columns:
+            - column:
+              name: user_id
+              value: 211661237
+            - column:
+              name: username
+              value: dubinsky_sl
+            - column:
+              name: is_admin
+              value: true
+        - insert:
+          tableName: user_balance
+          columns:
+            - column:
+              name: user_id
+              value: 211661237
+            - column:
+              name: balance
+              value: 0
