@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: dubinsky-pv-01
+  namespace: dubinsky-chatgpt-bot
+spec:
+  capacity:
+    storage: 1Gi
+  persistentVolumeReclaimPolicy: Recycle
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp2

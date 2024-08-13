@@ -82,6 +82,16 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: OAIKEY
+            - name: OAIMODEL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: OAIMODEL
+            - name: OAIDALLEMODEL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: OAIDALLEMODEL
             - name: BOTKEY
               valueFrom:
                 secretKeyRef:
