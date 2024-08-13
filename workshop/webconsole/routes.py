@@ -1,11 +1,10 @@
 '''Маршруты (основной контроллер)'''
 from flask import Blueprint, render_template, session, redirect, url_for, request
 from sqlalchemy import select, update
-from webconsole.database import get_engine, User, UserBalance
+from sqlalchemy.orm import Session
+from webconsole.database import get_engine, User, UserBalance, engine
 
 bp = Blueprint('main', __name__)
-
-session_engine = get_engine()
 
 @bp.route('/')
 def index():
@@ -24,16 +23,17 @@ def login():
         session['is_admin'] = False
         session['allow_prompt'] = False
         session['allow_dalle'] = False
-        userdata = session_engine.scalars(
-            select(User).where(User.username == session['username'])
-        ).first()
-        if userdata is not None:
-            session['user_id'] = userdata.user_id
-            session['created'] = userdata.created
-            session['is_admin'] = userdata.is_admin
-            session['allow_prompt'] = userdata.allow_prompt
-            session['allow_dalle'] = userdata.allow_dalle
-        return redirect(url_for('main.index'))
+        with get_engine() as session_engine:
+            userdata = session_engine.scalars(
+                select(User).where(User.username == session['username'])
+            ).first()
+            if userdata is not None:
+                session['user_id'] = userdata.user_id
+                session['created'] = userdata.created
+                session['is_admin'] = userdata.is_admin
+                session['allow_prompt'] = userdata.allow_prompt
+                session['allow_dalle'] = userdata.allow_dalle
+            return redirect(url_for('main.index'))
     return render_template('login.html')
 
 @bp.route('/logout')
@@ -48,13 +48,13 @@ def balance():
     if 'username' in session:
         userbalance = '0'
         if session['user_id'] is not None:
-            with session_engine.connect() as connection:
-                userdata = connection.scalars(
+            with get_engine() as session_engine:
+                userdata = session_engine.scalars(
                     select(UserBalance)
                     .where(UserBalance.user_id == session['user_id'])
                 ).first()
                 userbalance = '0' if userdata is None else str(userdata.balance)
-            return render_template('balance.html', userbalance=userbalance)
+                return render_template('balance.html', userbalance=userbalance)
     return redirect(url_for('main.login'))
 
 @bp.route('/detail')
@@ -76,11 +76,11 @@ def users():
     '''Список пользователей'''
     if ('username' in session and session['is_admin'] is True):
         user_list = None
-        with session_engine.connect() as connection:
-            user_list = connection.scalars(
+        with get_engine() as session_engine:
+            user_list = session_engine.scalars(
                 select(User, UserBalance)
                 .join_from(User, UserBalance, isouter=True))
-        return render_template('users.html', users=user_list)
+            return render_template('users.html', users=user_list)
     return render_template('404.html')
 
 @bp.route('/user/<user_id>', methods=['GET','POST'])
@@ -92,26 +92,26 @@ def user_detail(user_id):
         if request.method == 'GET':
             _user = None
             _user_balance = 0
-            with session_engine.connect() as connection:
-                _user = connection.scalars(
+            with get_engine() as session_engine:
+                _user = session_engine.scalars(
                     select(User).where(User.user_id==user_id)
                 ).first()
-                _user_balance = connection.scalars(
+                _user_balance = session_engine.scalars(
                     select(UserBalance).where(UserBalance.user_id==user_id)
                 ).first()
-            return render_template('user_detail.html', user=_user, user_balance=_user_balance)
+                return render_template('user_detail.html', user=_user, user_balance=_user_balance)
         if request.method == 'POST':
             is_admin = 'is_admin' in request.form
             allow_prompt = 'allow_prompt' in request.form
             allow_dalle = 'allow_dalle' in request.form
             _balance = 0 if (request.form['balance']=='') else request.form['balance']
-            with session_engine.connect() as connection:
-                connection.execute(
+            with get_engine() as session_engine:
+                session_engine.execute(
                     update(User).where(User.user_id==user_id)
                     .values(is_admin=is_admin, allow_prompt=allow_prompt, allow_dalle=allow_dalle))
-                connection.execute(
+                session_engine.execute(
                     update(UserBalance).where(UserBalance.user_id==user_id)
                     .values(balance=_balance))
-                connection.commit()
+                session_engine.commit()
             return redirect(url_for('main.users'))
     return render_template('404.html')
