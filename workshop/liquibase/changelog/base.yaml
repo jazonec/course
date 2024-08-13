@@ -67,6 +67,8 @@ databaseChangeLog:
             referencedColumnNames: user_id
             onDelete: CASCADE
   - changeset:
+      id: 3
+      author: sldubinsky
       changes:
         - insert:
           tableName: users
