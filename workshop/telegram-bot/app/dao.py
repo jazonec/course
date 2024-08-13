@@ -26,6 +26,9 @@ async def create_user(user_id: int, username: str):
             result = await conn.execute(
                 "INSERT into users(user_id, username) VALUES($1, $2)", user_id, username)
             logger.info("Результат создания %s, id=%s; name=%s", result, user_id, username)
+            result = await conn.execute(
+                "INSERT into user_balance(user_id, balance) VALUES($1, 0)", user_id)
+            logger.info("Результат создания нулевого баланса %s, id=%s; name=%s", result, user_id, username)
         else:
             logger.info("Пользователь уже существует, id=%s; name=%s", user_id, username)
     except asyncpg.PostgresError as e:
