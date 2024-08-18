@@ -94,7 +94,6 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.secret.name }}
                   key: OAIDALLEMODEL
-      containers:
         - name: webconsole
           image: "{{ .Values.image_webconsole.repository }}:{{ .Values.image_webconsole.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image_webconsole.pullPolicy }}
