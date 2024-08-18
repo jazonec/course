@@ -113,8 +113,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: EKS login
-        run: aws eks --region ${{ vars.AWS_REGION }} \
-          update-kubeconfig --name ${{ vars.EKS_NAME }}
+        run: aws eks --region ${{ vars.AWS_REGION }} update-kubeconfig --name ${{ vars.EKS_NAME }}
 
       - uses: azure/setup-helm@v4.2.0
 
