@@ -69,6 +69,7 @@ jobs:
     outputs:
       new_tag_liquibase: ${{ steps.push_image.outputs.new_tag_liquibase }}
       new_tag_telegram_bot: ${{ steps.push_image.outputs.new_tag_telegram_bot }}
+      new_tag_webconsole: ${{ steps.push_image.outputs.new_tag_webconsole }}
     needs:
       - pylint
     permissions:
@@ -126,6 +127,7 @@ jobs:
           telegram-bot \
           --set image_bot.tag=${{ needs.build_and_push.outputs.new_tag_telegram_bot }} \
           --set image_liquibase.tag=${{ needs.build_and_push.outputs.new_tag_liquibase }} \
+          --set image_webconsole.tag=${{ needs.build_and_push.outputs.new_tag_webconsole }} \
           --wait \
           ./telegram_bot
         working-directory: ./workshop/charts
