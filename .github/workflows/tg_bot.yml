@@ -26,7 +26,7 @@ jobs:
         with:
           filters: |
             telegram-bot:
-              - 'workshop/telegram-bot/**'
+              - 'workshop/telegram_bot/**'
             webconsole:
               - 'workshop/webconsole/**'
 
@@ -44,7 +44,7 @@ jobs:
         if: steps.filter.outputs.telegram-bot == 'true'
         run: |
           pip install -r requirements.txt
-        working-directory: ./workshop/telegram-bot/app
+        working-directory: ./workshop/telegram_bot/app
 
       - name: Install webconsole requirements
         if: steps.filter.outputs.webconsole == 'true'
@@ -56,7 +56,7 @@ jobs:
         if: steps.filter.outputs.telegram-bot == 'true'
         run: |
           pylint *.py
-        working-directory: ./workshop/telegram-bot/app
+        working-directory: ./workshop/telegram_bot/app
 
       - name: Analysing webconsole with pylint
         if: steps.filter.outputs.webconsole == 'true'
