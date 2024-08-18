@@ -127,7 +127,14 @@ jobs:
           telegram-bot \
           --set image_bot.tag=${{ needs.build_and_push.outputs.new_tag_telegram_bot }} \
           --set image_liquibase.tag=${{ needs.build_and_push.outputs.new_tag_liquibase }} \
-          --set image_webconsole.tag=${{ needs.build_and_push.outputs.new_tag_webconsole }} \
           --wait \
           ./telegram_bot
+          helm \
+          upgrade --install \
+          --namespace ${{ vars.KUBE_NS }} \
+          --create-namespace \
+          webconsole \
+          --set image_webconsole.tag=${{ needs.build_and_push.outputs.new_tag_webconsole }} \
+          --wait \
+          ./webconsole
         working-directory: ./workshop/charts
