@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image_bot:
+  pullPolicy: Always
+  repository: ghcr.io/jazonec/tg-bot_gpt-telegram_bot
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+image_liquibase:
+  repository: ghcr.io/jazonec/tg-bot_gpt-liquibase
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+image_webconsole:
+  repository: ghcr.io/jazonec/tg-bot_gpt-webconsole
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+secret:
+  name: app-secrets

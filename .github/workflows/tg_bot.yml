@@ -9,13 +9,17 @@ on:
       - synchronize
     paths:
       - 'workshop/**'
+      - '.github/workflows/tg_bot.yml'
 
 env:
   PROJECT_NAME: tg-bot_gpt
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
   pylint:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -23,7 +27,7 @@ jobs:
         with:
           filters: |
             telegram-bot:
-              - 'workshop/telegram-bot/**'
+              - 'workshop/telegram_bot/**'
             webconsole:
               - 'workshop/webconsole/**'
 
@@ -41,7 +45,7 @@ jobs:
         if: steps.filter.outputs.telegram-bot == 'true'
         run: |
           pip install -r requirements.txt
-        working-directory: ./workshop/telegram-bot/app
+        working-directory: ./workshop/telegram_bot
 
       - name: Install webconsole requirements
         if: steps.filter.outputs.webconsole == 'true'
@@ -53,7 +57,7 @@ jobs:
         if: steps.filter.outputs.telegram-bot == 'true'
         run: |
           pylint *.py
-        working-directory: ./workshop/telegram-bot/app
+        working-directory: ./workshop/telegram_bot/app
 
       - name: Analysing webconsole with pylint
         if: steps.filter.outputs.webconsole == 'true'
@@ -62,8 +66,12 @@ jobs:
         working-directory: ./workshop/webconsole
 
   build_and_push:
-#    needs:
-#      - pylint
+    outputs:
+      new_tag_liquibase: ${{ steps.push_image.outputs.new_tag_liquibase }}
+      new_tag_telegram_bot: ${{ steps.push_image.outputs.new_tag_telegram_bot }}
+      new_tag_webconsole: ${{ steps.push_image.outputs.new_tag_webconsole }}
+    needs:
+      - pylint
     permissions:
       contents: read
       packages: write
@@ -71,7 +79,7 @@ jobs:
     strategy:
       matrix:
         dir:
-          - telegram-bot
+          - telegram_bot
           - webconsole
           - liquibase
     steps:
@@ -85,13 +93,41 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image
+        id: push_image
         run: |
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/${{ env.PROJECT_NAME }}-${{ matrix.dir }}
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          [ "$VERSION" == "main" ] && VERSION=latest
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
+          CURRENT_BRANCH=${{ github.head_ref || github.ref_name }} 
+          if [ "$CURRENT_BRANCH" == "main" ]; then
+            TAG=latest
+          else
+            TAG="$CURRENT_BRANCH"
+          fi
+          docker tag $PROJECT_NAME $IMAGE_ID:$TAG
+          docker push $IMAGE_ID:$TAG
+          echo "new_tag_${{ matrix.dir }}=$TAG" >> $GITHUB_OUTPUT
 
-          docker tag $PROJECT_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - build_and_push
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: EKS login
+        run: aws eks --region ${{ vars.AWS_REGION }} update-kubeconfig --name ${{ vars.EKS_NAME }}
+
+      - uses: azure/setup-helm@v4.2.0
+
+      - name: helm upgrade --install
+        run: |
+          helm \
+          upgrade --install \
+          --namespace ${{ vars.KUBE_NS }} \
+          --create-namespace \
+          telegram-bot \
+          --set image_bot.tag=${{ needs.build_and_push.outputs.new_tag_telegram_bot }} \
+          --set image_liquibase.tag=${{ needs.build_and_push.outputs.new_tag_liquibase }} \
+          --set image_webconsole.tag=${{ needs.build_and_push.outputs.new_tag_webconsole }} \
+          --wait \
+          ./telegram_bot
+        working-directory: ./workshop/charts
