@@ -17,6 +17,8 @@ spec:
       containers:
         - name: webconsole
           image: "{{ .Values.image_webconsole.repository }}:{{ .Values.image_webconsole.tag | default .Chart.AppVersion }}"
+          ports:
+            - containerPort: 8080
           imagePullPolicy: {{ .Values.image_webconsole.pullPolicy }}
           env:
             - name: FLASK_APP
