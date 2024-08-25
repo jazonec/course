@@ -1,0 +1,22 @@
+apiVersion: skaffold/v4beta10
+kind: Config
+metadata:
+  name: dubinsky-gpt-bot
+build:
+  artifacts:
+  - image: dubinsky_gpt_bot_liquibase
+    context: liquibase
+  - image: dubinsky_gpt_bot_telegram_bot
+    context: telegram_bot
+deploy:
+  kubeContext: arn:aws:eks:eu-central-1:632497825040:cluster/iac-001-study-cluster
+  helm:
+    releases:
+    - name: dubinsky-telegram-bot
+      namespace: dubinsky-chatgpt-bot-dev
+      chartPath: charts/telegram-bot
+      setValueTemplates:
+        image_liquibase.repository: "{{.IMAGE_REPO_dubinsky_gpt_bot_liquibase}}"
+        image_liquibase.tag: "{{.IMAGE_TAG_dubinsky_gpt_bot_liquibase}}@{{.IMAGE_DIGEST_dubinsky_gpt_bot_liquibase}}"
+        image_bot.repository: "{{.IMAGE_REPO_dubinsky_gpt_bot_telegram_bot}}"
+        image_bot.tag: "{{.IMAGE_TAG_dubinsky_gpt_bot_telegram_bot}}@{{.IMAGE_DIGEST_dubinsky_gpt_bot_telegram_bot}}"
