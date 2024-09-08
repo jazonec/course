@@ -1,24 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "telegram-bot.fullname" . }}
+  name: {{ include "webconsole.fullname" . }}
   labels:
-    {{- include "telegram-bot.labels" . | nindent 4 }}
+    {{- include "webconsole.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "telegram-bot.selectorLabels" . | nindent 6 }}
+      {{- include "webconsole.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "telegram-bot.selectorLabels" . | nindent 8 }}
+        {{- include "webconsole.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: webconsole
           image: "{{ .Values.image_webconsole.repository }}:{{ .Values.image_webconsole.tag | default .Chart.AppVersion }}"
           ports:
             - containerPort: 8080
+              name: http-port
           imagePullPolicy: {{ .Values.image_webconsole.pullPolicy }}
           env:
             - name: FLASK_APP

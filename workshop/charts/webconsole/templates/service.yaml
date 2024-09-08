@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "webconsole.fullname" . }}
+  labels:
+    {{- include "webconsole.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http-port
+      protocol: TCP
+      name: http-port
+  selector:
+    {{- include "webconsole.selectorLabels" . | nindent 6 }}
