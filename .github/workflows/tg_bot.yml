@@ -127,6 +127,7 @@ jobs:
           telegram-bot \
           --set image_bot.tag=${{ needs.build_and_push.outputs.new_tag_telegram_bot }} \
           --set image_liquibase.tag=${{ needs.build_and_push.outputs.new_tag_liquibase }} \
+          --set serviceAccount.aws_role_arn=arn:aws:iam::632497825040:role/dubinsky-bot-role \
           --wait \
           ./telegram_bot
           helm \
