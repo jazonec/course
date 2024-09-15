@@ -6,5 +6,16 @@ image_webconsole:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+container:
+  port: 8080
+
+service:
+  port: 8080
+
 secret:
   name: app-secrets
+
+ingress:
+  enabled: true
+  host: dubinsky-bot.danilevich-it-school.com
+  cluster_issuer: cert-manager

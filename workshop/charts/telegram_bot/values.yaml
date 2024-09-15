@@ -14,3 +14,7 @@ image_liquibase:
 
 secret:
   name: app-secrets
+
+serviceAccount:
+  name: sa-dubinsky-bot
+  aws_role_arn: ""

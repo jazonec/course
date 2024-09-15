@@ -6,16 +6,19 @@ import asyncio
 import base64
 import httpx
 from openai import OpenAI
-from config import settings, get_oaiproxy_url
+from config import settings
+#from config import  get_oaiproxy_url
 from exceptions import OAICreateImageException
 
-logging.info("proxy: %s", settings.proxy_host)
+logging.info("Подключаюсь к OAI")
+#logging.info("proxy: %s", settings.proxy_host)
 client = OpenAI(api_key=settings.oai_key
                 #, http_client=httpx.Client(
                 #    proxies={"http:": get_oaiproxy_url(),
                 #         "https:": get_oaiproxy_url()}
                 #)
 )
+logging.info("OAI запущен")
 
 async def get_prompt(message_text: str):
     """Генерация ответа на запрос."""

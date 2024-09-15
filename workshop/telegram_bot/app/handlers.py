@@ -9,9 +9,11 @@ from exceptions import OAICreateImageException
 
 def init_handlers(application: ApplicationBuilder):
     '''Инициализация хэндлеров'''
+    logging.info("Инициализирую хэндлеры...")
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler("image", create_image))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat_prompt))
+    logging.info("Хэндлеры инициализированы")
 
 async def send_status(action: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''Асинхронная отправка статусов в чат'''

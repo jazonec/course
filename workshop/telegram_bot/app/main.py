@@ -27,7 +27,6 @@ from telegram.ext import ApplicationBuilder
 import handlers
 
 application = ApplicationBuilder().token(settings.bot_key).build()
-logging.info("Инициализирую хэндлеры...")
 handlers.init_handlers(application)
 logging.info("Запускаю бот...")
 logging.info("Модель промтов: %s", settings.oai_model)

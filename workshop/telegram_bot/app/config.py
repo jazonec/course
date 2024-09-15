@@ -9,9 +9,9 @@ class Settings():
     oai_model = os.getenv("OAIMODEL")
     oai_dalle_model = os.getenv("OAIDALLEMODEL")
     bot_key = os.getenv("BOTKEY")
-    proxy_host = os.getenv("PROXYHOST")
-    proxy_user = os.getenv("PROXYLOGIN")
-    proxy_pass = os.getenv("PROXYPASS")
+    #proxy_host = os.getenv("PROXYHOST")
+    #proxy_user = os.getenv("PROXYLOGIN")
+    #proxy_pass = os.getenv("PROXYPASS")
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
     DB_USER = os.getenv("POSTGRES_USER")
@@ -29,4 +29,5 @@ def get_db_url():
 
 def get_oaiproxy_url():
     '''Возвращает строку подключения к прокси (для OpenAI)'''
-    return f"http://{settings.proxy_user}:{settings.proxy_pass}@{settings.proxy_host}"
+    #return f"http://{settings.proxy_user}:{settings.proxy_pass}@{settings.proxy_host}"
+    return ""
